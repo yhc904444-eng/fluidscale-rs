@@ -1,0 +1,38 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-test:
+    name: Windows x64 (MSVC) Test & Release Build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run unit & layout tests
+        run: cargo test -- --nocapture
+
+      - name: Build Release binaries
+        run: cargo build --release --bins
+
+      - name: Verify compiled CLI binary
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "target/release/FluidScale.exe")) { throw "Missing FluidScale.exe" }
+          if (-not (Test-Path "target/release/fluidscale-rs.exe")) { throw "Missing fluidscale-rs.exe" }
+          ./target/release/fluidscale-rs.exe --version

@@ -193,6 +193,13 @@ impl AppConfig {
     }
 
     pub fn save(&self, path: &Path) -> Result<()> {
+        if let Some(parent) = path.parent() {
+            if !parent.as_os_str().is_empty() {
+                fs::create_dir_all(parent).with_context(|| {
+                    format!("failed to create config directory {}", parent.display())
+                })?;
+            }
+        }
         let toml_text = toml::to_string_pretty(self).context("failed to serialize AppConfig")?;
         fs::write(path, toml_text)
             .with_context(|| format!("failed to write config file {}", path.display()))?;
@@ -347,5 +354,20 @@ mod tests {
         cfg.apply_preset("reset");
         assert_eq!(cfg.profiles.len(), 2, "reset must preserve custom user profiles");
         assert!(cfg.preserve_aspect_ratio());
+    }
+
+    #[test]
+    fn save_creates_missing_parent_directory_and_roundtrips() {
+        let tmp_dir = std::env::temp_dir().join(format!(
+            "fluidscale-cfg-test-{}",
+            std::process::id()
+        ));
+        let nested = tmp_dir.join("nested").join("config.toml");
+        let cfg = AppConfig::default();
+        cfg.save(&nested).expect("save should create missing parent dirs");
+        let loaded = AppConfig::load_or_default(&nested).expect("load roundtrip should succeed");
+        assert_eq!(loaded.upscaling.aspect_ratio_mode, "preserve");
+        assert_eq!(loaded.capture.countdown_secs, 3);
+        let _ = fs::remove_dir_all(&tmp_dir);
     }
 }

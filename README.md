@@ -1,8 +1,25 @@
 # FluidScale (`fluidscale-rs`) v0.1.0
 
+[![Windows CI](https://github.com/yhc904444-eng/fluidscale-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/yhc904444-eng/fluidscale-rs/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/yhc904444-eng/fluidscale-rs)](https://github.com/yhc904444-eng/fluidscale-rs/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 基于 **Rust + eframe/egui + wgpu (DX12 / Vulkan) + WGSL Compute Shader + Win32** 构建的净室原创（Clean-Room）Windows 屏幕空间超分与帧生成桌面应用。
 
 无需注入游戏进程，兼容反作弊；通过 `WDA_EXCLUDEFROMCAPTURE` + 置顶穿透覆盖层对窗口化 / 无边框游戏进行实时画质放大与丝滑补帧。
+
+## 直接下载使用（Windows x64 便携版）
+
+从 [GitHub Releases](https://github.com/yhc904444-eng/fluidscale-rs/releases/latest) 下载 `FluidScale-v0.1.0-windows-x64.zip`，解压到任意目录后直接双击运行：
+
+- `FluidScale.exe`：独立桌面图形界面（无控制台黑窗；仅依赖 Windows 原生系统 DLL，无需安装额外运行库）。
+- `fluidscale-rs.exe`：命令行 + 覆盖层工作进程（支持 `benchmark` / `capture` / `demo` / `list-gpus` / `list-windows`）。
+
+### 使用须知
+- **运行环境**：Windows 10 / 11 (x64)，支持 DirectX 12 或 Vulkan 的显卡驱动（NVIDIA / AMD / Intel 均可）。
+- **首次运行 SmartScreen 提示**：开源便携包未购买付费代码签名证书，首次双击若弹出“Windows 已保护你的电脑”，点击 **“更多信息” → “仍要运行”** 即可。
+- **配置保存位置**：默认保存在程序同目录 `config.toml`（方便绿色便携拷贝）；若解压至 `C:\Program Files` 等只读目录，会自动回退保存到 `%APPDATA%\FluidScale\config.toml`。
+- **界面语言**：当前桌面 UI 为简体中文（依赖 Windows 内置微软雅黑 / 黑体字体；英文版 Windows 如未安装中文补充字体，建议在系统设置中勾选简体中文语言包）。
 
 ## 核心架构与四大优化
 
@@ -27,16 +44,13 @@
 - **窗口捕获**：支持倒计时（3s / 5s / 8s）自动抓取前台窗口或手动锁定目标窗口；DXGI 桌面复制失败时自动回退单窗口 GDI 兼容模式；支持点击即改的全局快捷键（支持 `Ctrl`/`Alt` + 字母或 `F8`-`F10` 并实时热重载）；支持专属游戏配置档切窗自动触发（`auto_scale`）。
 - **显卡与测速**：支持双卡/副卡补帧适配器选择、RenderGraph 显存槽位复用示意图与 1080p→2K / 2K→4K 实机 GPU 测速。
 
-## 直接下载使用（Windows x64 便携版）
+## 从源码编译与测试（Windows）
 
-从 GitHub Releases 下载 `FluidScale-v0.1.0-windows-x64.zip`，解压到任意英文或中文目录后直接双击运行：
+### 编译前提
+- 安装 [Rust stable](https://rustup.rs/)（推荐默认 **`x86_64-pc-windows-msvc`** 工具链 + Visual Studio C++ Build Tools，开箱即编译）。
+- 若使用 `x86_64-pc-windows-gnu` 工具链，请确保 MinGW-w64 的 `dlltool.exe` 位于系统 `PATH` 中。
 
-- `FluidScale.exe`：独立桌面图形界面（无控制台黑窗，配置自动保存在同目录 `config.toml`）。
-- `fluidscale-rs.exe`：命令行 + 覆盖层工作进程（支持 `benchmark` / `capture` / `demo` / `list-gpus` / `list-windows`）。
-
-> 环境要求：Windows 10 / 11 (x64)，支持 DirectX 12 或 Vulkan 的显卡驱动。
-
-## 从源码编译与测试
+### 常用命令
 
 ```powershell
 # 运行全部单元 + 实机 GPU 着色器 + 界面布局测试

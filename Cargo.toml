@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 description = "Clean-room Rust screen-space upscaling & frame-generation desktop app with DX12/Vulkan compute, tile-skipping indirect dispatch, RenderGraph VRAM aliasing, PI-PLL pacing, and motion-gated UI anti-jello compositing."
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yhc904444-eng/fluidscale-rs"
+homepage = "https://github.com/yhc904444-eng/fluidscale-rs"
+keywords = ["upscaling", "frame-generation", "wgpu", "wgsl", "windows"]
+categories = ["graphics", "rendering", "gui"]
 
 [lib]
 name = "fluidscale_rs"
