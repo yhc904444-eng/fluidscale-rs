@@ -1,0 +1,97 @@
+# FluidScale-RS 配置文件
+# Clean-room Rust 屏幕空间超分与帧生成引擎
+
+[gpu]
+# 首选后端: "auto" | "dx12" | "vulkan"
+backend = "auto"
+# 首选显卡名称子串（留空则自动选择高性能独显；双卡副卡插帧可指定核显/副卡名）
+preferred_adapter = ""
+# 是否使用紧凑像素格式 (RGB10A2 传输 / RG16F 光流 / R8 掩码) 降低显存与 PCIe 带宽
+compact_formats = true
+# 是否启用动态 FlowScale（根据单帧计算耗时自动伸缩光流分辨率，保帧率不掉帧）
+dynamic_flow_scale = true
+# 基础光流分辨率比例 (0.25 ~ 1.0)
+base_flow_scale = 0.5
+min_flow_scale = 0.25
+max_flow_scale = 0.85
+# Tile 静态跳过阈值（16x16 块平均亮度差低于此值时跳过光流与合成）
+tile_skip_threshold = 0.004
+# 是否启用 RenderGraph 瞬态显存池复用
+enable_vram_aliasing = true
+
+[upscaling]
+# 超分算法: "off" | "bicubic_cas" | "lanczos" | "sharp_bilinear" | "nearest"
+algorithm = "bicubic_cas"
+# CAS 对比度自适应锐化强度 (0.0 ~ 1.0)
+sharpness = 0.45
+# 画面比例: "preserve" (保持原画比例自动黑边) | "stretch" (拉伸铺满全屏)
+aspect_ratio_mode = "preserve"
+
+[frame_gen]
+# 模式: "off" | "fixed" | "adaptive"
+mode = "adaptive"
+# Fixed 模式倍率 (2, 3, 4)
+multiplier = 2
+# Adaptive 模式目标帧率
+target_fps = 120.0
+# 场景瞬切检测阈值（超过该比例的 Tile 发生剧变时自动回退直通，避免切镜撕裂）
+scene_cut_threshold = 0.65
+
+[ui_protection]
+# 运动门控时序滞回 UI 检测：仅在背景光流大于此阈值时更新 UI 置信度
+motion_gate_threshold = 0.75
+# 像素静止差异阈值
+static_diff_threshold = 0.015
+# 时序滞回：快速建立 / 慢速衰减速率
+attack_rate = 0.35
+decay_rate = 0.06
+# UI 边缘梯度先验加权（增强细线准星与文字保护）
+edge_prior_weight = 0.35
+# UI 禁采膨胀半径（像素，防止背景 Warp 从 UI 边界串色产生果冻光晕）
+dilation_radius = 2
+# 是否启用顶层 UI 清晰覆盖
+top_layer_composite = true
+
+[pacing]
+# 目标帧队列深度（1=极低延迟，2=均衡平滑）
+queue_target = 1.5
+# Huber/中位数离群值滤波窗口大小
+filter_window = 15
+# PI 锁相环最大微调幅度（0.006 = ±0.6%，人眼无感地吸收队列漂移）
+pll_max_slew = 0.006
+pll_kp = 0.004
+pll_ki = 0.0005
+# 启用内容感知重复帧去重
+enable_dedup = true
+dedup_threshold = 0.0008
+# 末段自旋等待时间（微秒，配合 WaitableTimerEx 消除 Windows 定时器误差）
+spin_wait_us = 600
+# 启用 ETW DXGKRNL Present 时间戳跟踪（需管理员权限，失败自动回退 QPC）
+enable_etw = true
+
+[osd]
+# Shader 内联位图字体 FPS 计数器（零 D2D1/DWrite 依赖，保护 DirectFlip/MPO）
+show_fps = true
+scale = 2
+
+[capture]
+# 捕获方式: "dxgi" | "window_gdi"
+api = "dxgi"
+# 同步模式: "mailbox" | "fifo" | "immediate"
+present_mode = "mailbox"
+# 热键 (Ctrl+Alt+S) 与启动倒计时秒数
+hotkey_ctrl = true
+hotkey_alt = true
+hotkey_key = "S"
+countdown_secs = 3
+
+# 游戏 Profile 示例（支持通配符匹配窗口标题/可执行文件名 + 显式静态 HUD 区域提示）
+[[profiles]]
+name = "Default"
+match_pattern = "*"
+auto_scale = false
+# 显式静态 HUD 归一化区域 [x, y, w, h]（可选：直接给小地图/血条/准星强先验，0 算力 100% 锁定）
+hud_hints = [
+  [0.02, 0.82, 0.24, 0.14], # 左下角血条/状态栏示例
+  [0.485, 0.485, 0.03, 0.03], # 屏幕正中心准星示例
+]

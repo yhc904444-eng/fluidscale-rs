@@ -1,0 +1,60 @@
+[package]
+name = "fluidscale-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room Rust screen-space upscaling & frame-generation desktop app with DX12/Vulkan compute, tile-skipping indirect dispatch, RenderGraph VRAM aliasing, PI-PLL pacing, and motion-gated UI anti-jello compositing."
+license = "MIT"
+
+[lib]
+name = "fluidscale_rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "fluidscale-rs"
+path = "src/main.rs"
+
+[[bin]]
+name = "FluidScale"
+path = "src/bin/fluidscale_app.rs"
+
+[dependencies]
+anyhow = "1.0"
+bytemuck = { version = "1.21", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
+eframe = { version = "0.31", default-features = false, features = ["wgpu", "default_fonts"] }
+egui = "0.31"
+parking_lot = "0.12"
+pollster = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+wgpu = "24.0"
+winit = "0.30"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_Storage_Xps",
+    "Win32_System_Diagnostics_Etw",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Performance",
+    "Win32_System_Threading",
+    "Win32_UI_Accessibility",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

@@ -1,0 +1,10 @@
+/target/
+/dist/
+/.vscode/
+/release-staging/
+*.zip
+*.log
+*.pdb
+*.tmp
+.DS_Store
+Thumbs.db
